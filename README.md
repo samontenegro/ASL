@@ -1,0 +1,2 @@
+# Sam's Autosplitters
+Here you will find a couple of fun autosplitters I maintain, usually in close collaboration with their respective speedrun community members. I mostly do this for fun, and for the sake of enabling others to have run running them games lickety-split.
