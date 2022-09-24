@@ -6,6 +6,7 @@ startup
     vars.Unity = Assembly.Load(File.ReadAllBytes(@"Components\UnityASL.bin")).CreateInstance("UnityASL.Unity");
     vars.Unity.LoadSceneManager = true;
 
+    // Logging
     vars.outputLineCounter = 0;
     Action<string> DebugOutput = (text) => {
 		print(vars.outputLineCounter + " [Prodeus ASL] " + text);
@@ -17,12 +18,14 @@ startup
     // constants
     vars.START_MAP = "map_name.map_name_intro";
     vars.FIRST_MISSION_MAP = "map_name.map_name_sacrum";
+    vars.SHOP_MAP = "map_name.map_name_shop";
     vars.SPLIT_SCENE = "LevelComplete";
     vars.MAIN_MENU_SCENE = "MainMenu";
     vars.MAP_SCENE = "MapLoader";
 
     // settings
     settings.Add("introSplit", false, "Split After Intro Level");
+    settings.Add("shopSplit", false, "Split when leaving shop");
 }
 
 init
@@ -107,7 +110,11 @@ onReset
 
 split
 {
-    if (current.Scene != old.Scene && current.Scene == vars.SPLIT_SCENE) return true;
+    if (current.Scene != old.Scene && current.Scene == vars.SPLIT_SCENE) {
+        if (!settings["shopSplit"] && current.mapTitle == vars.SHOP_MAP) return false;
+        else return true;
+    }
+
     if (settings["introSplit"] && current.mapTitle == vars.FIRST_MISSION_MAP && old.mapTitle == vars.START_MAP) return true;
 }
 
