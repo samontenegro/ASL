@@ -1,8 +1,10 @@
 # Prodeus Autosplitter
 ## Description
 ASL file for [Prodeus](https://www.prodeusgame.com/). Does not time during loads (load remover), and splits automatically upon reaching the results screen of each level. May be configured to optionally split when
+
 - transitioning from the Intro level to Sacrum
 - reaching the results screen of the Shop
+
 Do note this ASL script **continues to time in the overworld, during pause, and while the weapon wheel HUD is open**, but may be easily modified to not do so.
 
 ## Requirements
