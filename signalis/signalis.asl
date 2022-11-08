@@ -4,7 +4,7 @@ startup
 {
     //asl-help setup thanks to Ero
     Assembly.Load(File.ReadAllBytes(@"Components\asl-help")).CreateInstance("Unity");
-    vars.Helper.GameName = "Crypt";
+    vars.Helper.GameName = "Signalis";
     vars.Helper.LoadSceneManager = true;
 
     // Logging
