@@ -72,6 +72,11 @@ start
     return false;
 }
 
+onStart
+{
+    vars.IsRunStarted = true;
+}
+
 onReset
 {
     timer.IsGameTimePaused = true;
