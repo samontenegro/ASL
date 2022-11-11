@@ -65,18 +65,11 @@ init
 
 update
 {
-    if (vars.Helper.Scenes.Active.Name != null && vars.Helper.Scenes.Active.Name != "") 
-    {
-        current.Scene = vars.Helper.Scenes.Active.Name;
-    }
+    if (vars.Helper.Scenes.Active.Name != null && vars.Helper.Scenes.Active.Name != "") current.Scene = vars.Helper.Scenes.Active.Name;
 
     if (old.Scene != current.Scene)
     {
-        if (old.Scene == vars.MAIN_MENU_SCENE && current.Scene == vars.MAP_SCENE)
-        {
-            vars.IsRunStarting = true;
-            vars.DebugOutput("vars.IsRunStarting = true");
-        }
+        if (old.Scene == vars.MAIN_MENU_SCENE && current.Scene == vars.MAP_SCENE) vars.IsRunStarting = true;
 
         vars.DebugOutput("OLD SCENE -> " + old.Scene);
         vars.DebugOutput("NEW SCENE -> " + current.Scene);
