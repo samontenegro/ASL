@@ -56,10 +56,12 @@ startup
         { "map_name.map_name_trial_grenade", "Trial: Grenade" },
     };
 
+    vars.DefaultSplits = new List<string>() { "map_name.map_name_chaos_boss_1" };
+
     settings.Add("map_split", true, "Split on map completion");
     foreach(var split in vars.MapSplits.Keys)
     {
-        settings.Add(split, false, vars.MapSplits[split], "map_split");
+        settings.Add(split, vars.DefaultSplits.Contains(split), vars.MapSplits[split], "map_split");
         settings.SetToolTip(split, "Split on completing the map " + vars.MapSplits[split] + ".");
     }
 }
