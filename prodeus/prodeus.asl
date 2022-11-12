@@ -38,7 +38,7 @@ init
         var mapInfo = mono["MapInfo"];
 
         // Loading data
-        vars.Helper["loadingInfoInstance"] = loadingInfo.Make<IntPtr>("instance");
+        vars.Helper["loading"] = loadingInfo.Make<bool>("instance", "loading");
 
         // Hooks for later, in case the community decides to split or time differently
         vars.Helper["isPaused"] = gameInfo.Make<bool>("isPaused");
@@ -52,10 +52,6 @@ init
         vars.Helper["timeStart"] = mapInfo.Make<float>("timeStart");
 
         return true;
-    });
-
-    vars.GetIsLoading = (Func<IntPtr, bool>)((instanceAddr) => {
-        return memory.ReadValue<bool>(instanceAddr + 0x98); // offset into static class field is 0x98 (hex) --> 144 (dec)
     });
 
     // set defaults
@@ -109,7 +105,7 @@ split
 
 isLoading
 {
-    return vars.GetIsLoading(current.loadingInfoInstance);
+    return current.loading;
 }
 
 exit
