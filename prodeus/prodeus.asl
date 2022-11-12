@@ -2,16 +2,16 @@ state("Prodeus") {}
 
 startup
 {
-    //UnityASL setup thanks to Ero
-    vars.Unity = Assembly.Load(File.ReadAllBytes(@"Components\UnityASL.bin")).CreateInstance("UnityASL.Unity");
-    vars.Unity.LoadSceneManager = true;
+    // asl-help setup thanks to Ero
+    Assembly.Load(File.ReadAllBytes("Components/asl-help")).CreateInstance("Unity");
+    vars.Helper.LoadSceneManager = true;
 
     // Logging
     vars.outputLineCounter = 0;
     Action<string> DebugOutput = (text) => {
-		print(vars.outputLineCounter + " [Prodeus ASL] " + text);
+        print(vars.outputLineCounter + " [Prodeus ASL] " + text);
         vars.outputLineCounter++;
-	};
+    };
 
     vars.DebugOutput = DebugOutput;
 
@@ -30,39 +30,29 @@ startup
 
 init
 {
-    vars.Unity.TryOnLoad = (Func<dynamic, bool>)(helper =>
+    vars.Helper.TryLoad = (Func<dynamic, bool>)(mono =>
     {
         // Get references to classes
-        var loadingInfo = helper.GetClass("Assembly-CSharp", "LoadingInfo");
-        var gameInfo = helper.GetClass("Assembly-CSharp", "GameInfo");
-        var mapInfo = helper.GetClass("Assembly-CSharp", "MapInfo");
+        var loadingInfo = mono["LoadingInfo"];
+        var gameInfo = mono["GameInfo"];
+        var mapInfo = mono["MapInfo"];
 
         // Loading data
-        vars.Unity.Make<IntPtr>(loadingInfo.Static, loadingInfo["instance"]).Name = "loadingInfoInstance";
+        vars.Helper["loading"] = loadingInfo.Make<bool>("instance", "loading");
 
         // Hooks for later, in case the community decides to split or time differently
-        vars.Unity.Make<bool>(gameInfo.Static, gameInfo["isPaused"]).Name = "isPaused";
-        vars.Unity.Make<bool>(gameInfo.Static, gameInfo["isCampaignOverworld"]).Name = "isCampaignOverworld";
-        vars.Unity.Make<bool>(gameInfo.Static, gameInfo["timeStopped"]).Name = "isTimeStopped";
+        vars.Helper["isPaused"] = gameInfo.Make<bool>("isPaused");
+        vars.Helper["isCampaignOverworld"] = gameInfo.Make<bool>("isCampaignOverworld");
+        vars.Helper["timeStopped"] = gameInfo.Make<bool>("timeStopped");
 
         // game data
-        vars.Unity.MakeString(gameInfo.Static, gameInfo["mapTitle"]).Name = "mapTitle";
+        vars.Helper["mapTitle"] = gameInfo.MakeString("mapTitle");
 
         // map info
-        vars.Unity.Make<float>(mapInfo.Static, mapInfo["timeStart"]).Name = "timeStart";
+        vars.Helper["timeStart"] = mapInfo.Make<float>("timeStart");
 
         return true;
     });
-
-    vars.GetIsLoading = (Func<bool>)(() => {
-        bool isLoading = false;
-        IntPtr instanceAddr = vars.Unity["loadingInfoInstance"].Current;
-        isLoading = memory.ReadValue<bool>(instanceAddr + 152); // offset into static class field is 0x98 (hex) --> 144 (dec)
-
-        return isLoading;
-    });
-
-    vars.Unity.Load(game);
 
     // set defaults
     current.Scene = "";
@@ -71,12 +61,7 @@ init
 
 update
 {
-    if (!vars.Unity.Loaded) return false;
-	vars.Unity.Update();
-
-    if (vars.Unity.Scenes.Active.Name != "") current.Scene = vars.Unity.Scenes.Active.Name;
-    current.TimeStart = vars.Unity["timeStart"].Current;
-    current.mapTitle = vars.Unity["mapTitle"].Current;
+    if (vars.Helper.Scenes.Active.Name != null && vars.Helper.Scenes.Active.Name != "") current.Scene = vars.Helper.Scenes.Active.Name;
 
     if (old.Scene != current.Scene)
     {
@@ -84,7 +69,7 @@ update
 
         vars.DebugOutput("OLD SCENE -> " + old.Scene);
         vars.DebugOutput("NEW SCENE -> " + current.Scene);
-        vars.DebugOutput("MAP TITLE -> " + vars.Unity["mapTitle"].Current);
+        vars.DebugOutput("MAP TITLE -> " + current.mapTitle);
     }
 }
 
@@ -93,7 +78,7 @@ start
     if (vars.IsRunStarting) {
 
         // wait for timer to start on first level
-        if (old.TimeStart != current.TimeStart && vars.Unity["mapTitle"].Current == vars.START_MAP) {
+        if (old.timeStart != current.timeStart && current.mapTitle == vars.START_MAP) {
 
             // new initial time was set, which means a level started
             vars.IsRunStarting = false;
@@ -120,16 +105,10 @@ split
 
 isLoading
 {
-    return vars.GetIsLoading();
+    return current.loading;
 }
 
 exit
 {
-	timer.IsGameTimePaused = true;
-	vars.Unity.Reset();
-}
-
-shutdown
-{
-	vars.Unity.Reset();
+    timer.IsGameTimePaused = true;
 }
