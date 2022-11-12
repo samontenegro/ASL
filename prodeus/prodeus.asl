@@ -3,7 +3,6 @@ state("Prodeus") {}
 startup
 {
     // asl-help setup thanks to Ero
-	vars.Watch = (Action<string>)(key => { if(vars.Helper[key].Changed) vars.Log(key + ": " + vars.Helper[key].Old + " -> " + vars.Helper[key].Current); });
     Assembly.Load(File.ReadAllBytes("Components/asl-help")).CreateInstance("Unity");
     vars.Helper.LoadSceneManager = true;
 
@@ -113,9 +112,6 @@ update
         vars.DebugOutput("NEW SCENE -> " + current.Scene);
         vars.DebugOutput("MAP TITLE -> " + current.mapTitle);
     }
-
-    vars.Watch("mapTitle");
-    vars.Watch("timeStopped");
 }
 
 start
