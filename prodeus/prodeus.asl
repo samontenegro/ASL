@@ -30,6 +30,7 @@ startup
         { "map_name.map_name_research", "Research" },
         { "map_name.map_name_fuel", "Fuel" },
         { "map_name.map_name_wretch", "Wretch" },
+        { "map_name.map_name_chaos_generator", "Chaos Generator" },
         { "map_name.map_name_genesis_p1", "Genesis Part 1" },
         { "map_name.map_name_genesis_p2", "Genesis Part 2" },
         { "map_name.map_name_excavation", "Excavation" },
