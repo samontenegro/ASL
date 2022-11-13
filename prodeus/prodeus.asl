@@ -23,9 +23,47 @@ startup
     vars.MAIN_MENU_SCENE = "MainMenu";
     vars.MAP_SCENE = "MapLoader";
 
-    // settings
-    settings.Add("introSplit", false, "Split After Intro Level");
-    settings.Add("shopSplit", false, "Split when leaving shop");
+    vars.MapSplits = new Dictionary<string, string>() {
+        { "intro", "Intro (Tutorial)" },
+        { "map_name.map_name_shop", "Shop" },
+        { "map_name.map_name_sacrum", "Sacrum" },
+        { "map_name.map_name_research", "Research" },
+        { "map_name.map_name_fuel", "Fuel" },
+        { "map_name.map_name_wretch", "Wretch" },
+        { "map_name.map_name_chaos_generator", "Chaos Generator" },
+        { "map_name.map_name_genesis_p1", "Genesis Part 1" },
+        { "map_name.map_name_genesis_p2", "Genesis Part 2" },
+        { "map_name.map_name_excavation", "Excavation" },
+        { "map_name.map_name_memoriam", "Memoriam" },
+        { "map_name.map_name_marksman", "Marksman" },
+        { "map_name.map_name_descent", "Descent" },
+        { "map_name.map_name_hazard", "Hazard" },
+        { "map_name.map_name_meltdown", "Meltdown" },
+        { "map_name.map_name_forge", "The Forge" },
+        { "map_name.map_name_corruption", "Corruption" },
+        { "map_name.map_name_atonement", "Atonement" },
+        { "map_name.map_name_progenitor", "Progenitor" },
+        { "map_name.map_name_hexarchy", "Hexarchy" },
+        { "map_name.map_name_trench", "Trench" },
+        { "map_name.map_name_spacestation", "Space Station" },
+        { "map_name.map_name_aftermath", "Aftermath" },
+        { "map_name.map_name_frost", "Frost" },
+        { "map_name.map_name_chaos_1", "Gate to Chaos" },
+        { "map_name.map_name_chaos_boss_1", "Nexus Distortion" },
+        { "map_name.map_name_trial_shotgun", "Trial: Shotgun" },
+        { "map_name.map_name_trial_rockets", "Trial: Rockets" },
+        { "map_name.map_name_trial_shredders", "Trial: Shredders" },
+        { "map_name.map_name_trial_grenade", "Trial: Grenade" },
+    };
+
+    vars.DefaultSplits = new List<string>() { "map_name.map_name_chaos_boss_1" };
+
+    settings.Add("map_split", true, "Split on map completion");
+    foreach(var split in vars.MapSplits.Keys)
+    {
+        settings.Add(split, vars.DefaultSplits.Contains(split), vars.MapSplits[split], "map_split");
+        settings.SetToolTip(split, "Split on completing the map " + vars.MapSplits[split] + ".");
+    }
 }
 
 init
@@ -95,12 +133,13 @@ onReset
 
 split
 {
-    if (current.Scene != old.Scene && current.Scene == vars.SPLIT_SCENE) {
-        if (!settings["shopSplit"] && current.mapTitle == vars.SHOP_MAP) return false;
-        else return true;
-    }
-
-    if (settings["introSplit"] && current.mapTitle == vars.FIRST_MISSION_MAP && old.mapTitle == vars.START_MAP) return true;
+    /* Special case for the intro level */
+    if (settings["intro"] && current.mapTitle == vars.FIRST_MISSION_MAP && old.mapTitle == vars.START_MAP)
+        return true;
+ 
+    /* Split on map completion */
+    return old.Scene != current.Scene && current.Scene == vars.SPLIT_SCENE
+        && settings.ContainsKey(current.mapTitle) && settings[current.mapTitle];
 }
 
 isLoading
