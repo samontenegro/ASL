@@ -16,15 +16,57 @@ startup
     vars.DebugOutput = DebugOutput;
     
     // utility
-    vars.untimedStates = new int[] {
-        4, // gameStates::cutscene
-        5, // gameStates::traversing
-        9 // gameStates::loading
+    vars.untimedStates = new Dictionary<string, int>() {
+        {"Cutscene", 4},    // gameStates::cutscene
+        {"Traversal", 5},   // gameStates::traversing
+        {"Loading", 9}      // gameStates::loading
     };
 
     // constants
     vars.START_SCENE = "PEN_Wreck";
+    vars.END_SCENE = "EndCredits";
     vars.LOAD_SCENE = "LoadingScreen";
+
+    // Dynamic splits and settings
+    dynamic[,] settingsArray =
+    {
+        { "Settings", true, "Settings", null},
+            { "removeCutscenes",    true, "Remove Cutscenes: do not time while cutscenes are running", "Settings"},
+            { "removeTraversal",    true, "Remove Transitions: do not time while entering / exiting rooms", "Settings"},
+        { "Splits", true, "Splits", null},
+            // Mandatory { "PEN_Wreck", true, "Initial level", "Splits"},
+            { "PEN_Hole",           true, "Penrose Hole Desc",      "Splits"},
+            { "LOV_Reeducation",    true, "Reeducation (LOV) Desc", "Splits"},
+            { "DET_Detention",      true, "Detention Desc",         "Splits"},
+            { "MED_Medical",        true, "Medical Desc",           "Splits"},
+            { "RES_School",         true, "School Desc",            "Splits"},
+            { "RES_Residential",    true, "Residential Desc",       "Splits"},
+            { "EXC_Mines",          true, "Mines Desc",             "Splits"},
+            { "EXC_Gestade",        true, "Gestade (EXC) Desc",     "Splits"},
+            { "LAB_Labyrinth",      true, "Labyrinth Desc",         "Splits"},
+            { "LAB_Emptiness",      true, "Emptiness Desc",         "Splits"},
+            { "MEM_Memory",         true, "Memory Desc",            "Splits"},
+            { "MEM_Gestade",        true, "Gestade (MEM) Desc",     "Splits"},
+            { "BIO_Reeducation",    true, "Reeducation (BIO) Desc", "Splits"},
+            { "ROT_Rotfront",       true, "Rotfront Desc",          "Splits"},
+            { "BOS_Adler",          true, "Adler Desc",             "Splits"}
+            // Mandatory { "EndCredits", true, "Credits", "Splits"},
+    };
+
+    vars.settingsArray = settingsArray;
+    vars.splitLocations = new List<string>();
+
+    // build split locations and script settings
+    for (int i = 0; i < vars.settingsArray.GetLength(0); i++)
+    {
+        string sceneName = vars.settingsArray[i, 0];
+        bool defaultSetting = vars.settingsArray[i, 1];
+        string description = vars.settingsArray[i, 2];
+        string parent = vars.settingsArray[i, 3];
+
+        settings.Add(sceneName, defaultSetting, description, parent);
+        if (parent == "Splits") vars.splitLocations.Add(sceneName);
+    }
 }
 
 init
@@ -38,8 +80,14 @@ init
     });
 
     vars.GetIsLoading = (Func<bool>)(() => {
-        int[] us = vars.untimedStates;
-        return Array.Exists(us, e => e == vars.Helper["gameState"].Current);
+        bool isLoading = false;
+        int gameState = vars.Helper["gameState"].Current;
+
+        // return immediately if its not an untimed state
+        if (!vars.untimedStates.ContainsValue(gameState)) return false;
+        if (settings["removeCutscenes"] && vars.untimedStates["Cutscene"] == gameState) isLoading = true;
+        if (settings["removeTraversal"] && vars.untimedStates["Traversal"] == gameState) isLoading = true;
+        return isLoading;
     });
 
     // set defaults
@@ -85,9 +133,14 @@ onReset
 
 split
 {
-    // split on scene change, but don't take loadscreens into account
-    if (vars.IsRunStarted) {
-        if (current.Scene != old.Scene && current.Scene != vars.LOAD_SCENE) return true;
+    // split on scene change, but only if a run is ongoing
+    if (vars.IsRunStarted && current.Scene != old.Scene) {
+        
+        // check if scene changed and if it belongs in the valid split locations based on Scene names
+        if (vars.splitLocations.Contains(current.Scene)) return settings[current.Scene];
+
+        // Check if scene is the end credits
+        if (current.Scene == vars.END_SCENE) return true;
     }
 
     return false;
