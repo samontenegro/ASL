@@ -7,7 +7,7 @@ startup
     vars.Helper.GameName = "Fashion Police Squad";
     vars.Helper.LoadSceneManager = true;
 
-    vars.UntimedScenes = new List<String> {
+    vars.UntimedScenes = new List<string> {
         "LoadingScreen",
         "MainMenu"
     };
