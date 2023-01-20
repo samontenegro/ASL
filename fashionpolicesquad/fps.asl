@@ -12,12 +12,27 @@ startup
         "MainMenu"
     };
 
+    vars.LevelScenes = new List<string> {
+        "001-t1-level-01",
+        "002-t1-level-02",
+        "003-t1-BAUSS-FIGHT",
+        "004-t2-level-04",
+        "004-t2-level-05",
+        "006-t3-level-06-GREYBOX",
+        "007-t3-level-07-GREYBOX",
+        "008-t3-level-08-Hackerman",
+        "009-t4-level-09-GREYBOX",
+        "010-t4-level-10-GREYBOX",
+        "011-t5-level-11",
+        "012-t5-level-12",
+        "013-t6-level-13-TURNCOAT-BOSS"
+    };
+
     // constants
     vars.SPLIT_SCENE        = "Runway";
     vars.START_SCENE        = "001-intro-cinematic";
     vars.WORLD_MAP_SCENE    = "WorldMap";
     vars.LOADING_SCENE      = "LoadingScreen";
-    vars.FIRST_LEVEL        = "001-t1-level-01";
 
     // Optional timing in World
     settings.Add("WorldMapUntimed", false, "Untimed World Map: pause timer while in the World Map");
@@ -77,7 +92,7 @@ update
     if (old.Scene != current.Scene) vars.Log("Scene updated: " + old.Scene + " -> " + current.Scene);
 
     // Initialize progress tracking, but only after first level
-    if (current.Scene == vars.FIRST_LEVEL && !vars.trackingInitialized && settings["TrackLevelProgress"]) {
+    if (vars.LevelScenes.Contains(current.Scene) && !vars.trackingInitialized && settings["TrackLevelProgress"]) {
         if (vars.PostLoad()) vars.trackingInitialized = true;
     }
 
@@ -107,4 +122,5 @@ isLoading
 exit
 {
 	timer.IsGameTimePaused = true;
+    vars.trackingInitialized = false;
 }
