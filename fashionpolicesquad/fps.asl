@@ -4,17 +4,10 @@ startup
 {
     // asl-help setup thanks to Ero
     Assembly.Load(File.ReadAllBytes("Components/asl-help")).CreateInstance("Unity");
+    vars.Helper.GameName = "Fashion Police Squad";
     vars.Helper.LoadSceneManager = true;
 
-    // logger
-    vars.outputLineCounter = 0;
-    Action<string> DebugOutput = (text) => {
-		print(vars.outputLineCounter + " [Fashion Police Squad ASL] " + text);
-        vars.outputLineCounter++;
-	};
-    vars.DebugOutput = DebugOutput;
-
-    vars.UntimedScenes = new List<String>() {
+    vars.UntimedScenes = new List<string> {
         "LoadingScreen",
         "MainMenu"
     };
@@ -25,23 +18,10 @@ startup
     vars.WORLD_MAP_SCENE    = "WorldMap";
     vars.LOADING_SCENE      = "LoadingScreen";
 
-    // Setting setup by Meta
-    // Asks user to change to game time if LiveSplit is currently set to Real Time.
-    if (timer.CurrentTimingMethod == TimingMethod.RealTime)
-    {        
-        var timingMessage = MessageBox.Show (
-            "This game uses Time without Loads (Game Time) as the main timing method.\n"+
-            "LiveSplit is currently set to show Real Time (RTA).\n"+
-            "Would you like to set the timing method to Game Time?",
-            "LiveSplit | Fashion Police Squad",
-            MessageBoxButtons.YesNo,MessageBoxIcon.Question
-        );
-        
-        if (timingMessage == DialogResult.Yes) timer.CurrentTimingMethod = TimingMethod.GameTime;
-    }
-
     // Optional timing in World
     settings.Add("WorldMapUntimed", false, "Untimed World Map: pause timer while in the World Map");
+
+    vars.Helper.AlertLoadless();
 }
 
 init
@@ -60,21 +40,14 @@ init
 
 update
 {
-    try { if (vars.Helper.Scenes.Active.Name != "") current.Scene = vars.Helper.Scenes.Active.Name; }
-    catch (System.ComponentModel.Win32Exception) { /* Ignore handle exceptions */ }
+    current.Scene = vars.Helper.Scenes.Active.Name ?? old.Scene;
 
-    if (old.Scene != current.Scene) vars.DebugOutput("Scene updated: " + old.Scene + " -> " + current.Scene);
+    if (old.Scene != current.Scene) vars.Log("Scene updated: " + old.Scene + " -> " + current.Scene);
 }
 
 start
 {
-    timer.IsGameTimePaused = false;
     if (current.Scene == vars.START_SCENE) return true;
-}
-
-onReset
-{
-    timer.IsGameTimePaused = true;
 }
 
 split
@@ -84,7 +57,7 @@ split
 
 isLoading
 {
-    return vars.UntimedScenes.Contains(current.Scene) || (settings["WorldMapUntimed"] && current.Scene == vars.WORLD_MAP_SCENE) ||vars.Helper["IsLoading"].Current;
+    return vars.UntimedScenes.Contains(current.Scene) || (settings["WorldMapUntimed"] && current.Scene == vars.WORLD_MAP_SCENE) || current.IsLoading;
 }
 
 exit
